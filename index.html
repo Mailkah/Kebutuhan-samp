@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mailkah· Vault Link Hub</title>
+    <!-- Google Fonts + Icon Library -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:opsz,wght@14..32,400;14..32,600;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 20%, #0a0c0a, #020402);
+            font-family: 'Inter', 'Orbitron', sans-serif;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* efek grain / noise */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjciIG51bU9jdGF2ZXM9IjMiLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjZikiIG9wYWNpdHk9IjAuMDYiLz48L3N2Zz4=');
+            background-repeat: repeat;
+            pointer-events: none;
+            opacity: 0.25;
+            z-index: 0;
+        }
+
+        /* container utama */
+        .game-hub {
+            max-width: 950px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(6, 12, 6, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            border: 1px solid rgba(245, 166, 35, 0.6);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 2px #2c1e0c, 0 0 0 5px rgba(255, 160, 0, 0.2);
+            position: relative;
+            transition: all 0.2s;
+            z-index: 2;
+        }
+
+        /* header dengan posisi relatif untuk tombol settings */
+        .gta-header {
+            background: linear-gradient(135deg, #1a2813, #0a1307);
+            padding: 1rem 2rem;
+            border-radius: 48px 48px 0 0;
+            border-bottom: 3px solid #f5a623;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .brand h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #f9d976, #f39f2e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 8px #ff9900aa;
+            letter-spacing: 2px;
+        }
+        .brand p {
+            font-size: 0.7rem;
+            color: #cfb87c;
+            letter-spacing: 1px;
+        }
+
+        /* TOMBOL SETTINGS (GEAR) */
+        .settings-btn {
+            background: rgba(0,0,0,0.7);
+            border: 1.5px solid #f5a623;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 6px #f5a623;
+        }
+        .settings-btn i {
+            font-size: 1.8rem;
+            color: #ffbc5e;
+            transition: 0.2s;
+        }
+        .settings-btn:hover {
+            transform: rotate(30deg) scale(1.05);
+            background: #f5a623;
+            border-color: #fff0c0;
+        }
+        .settings-btn:hover i {
+            color: #1e2a0c;
+        }
+
+        /* area halaman */
+        .pages-container {
+            padding: 2rem 2rem 1.5rem;
+            min-height: 480px;
+        }
+
+        .page {
+            display: none;
+            animation: glitchAppear 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .active-page {
+            display: block;
+        }
+
+        @keyframes glitchAppear {
+            0% { opacity: 0; transform: translateY(12px) scale(0.98); filter: blur(2px);}
+            100% { opacity: 1; transform: translateY(0px) scale(1); filter: blur(0);}
+        }
+
+        .page-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #ffbc5e;
+            text-shadow: 0 0 5px #ff9100, 2px 2px 0px #2c2c2c;
+            margin-bottom: 28px;
+            border-left: 5px solid #f5a623;
+            padding-left: 18px;
+            letter-spacing: -0.5px;
+        }
+
+        /* card / link grid modern */
+        .link-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .gta-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(95deg, #1e1a10d9, #0f0e07d9);
+            backdrop-filter: blur(3px);
+            border: 1px solid rgba(245, 166, 35, 0.5);
+            border-radius: 60px;
+            padding: 6px 20px 6px 28px;
+            transition: all 0.25s;
+            box-shadow: 0 6px 0 #3a2a16;
+            text-decoration: none;
+        }
+        .gta-card span {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: #fdebb3;
+            font-family: 'Inter', monospace;
+            letter-spacing: 0.5px;
+        }
+        .gta-card i {
+            font-size: 1.4rem;
+            color: #ffb347;
+            transition: 0.2s;
+        }
+        .gta-card:hover {
+            transform: translateY(-3px);
+            background: #302617cc;
+            border-color: #ffcf7a;
+            box-shadow: 0 8px 0 #5a3e18;
+        }
+        .gta-card:hover i {
+            transform: translateX(5px);
+            color: #ffdd99;
+        }
+        .gta-card:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #3a2a16;
+        }
+
+        /* catatan discord */
+        .discord-alert {
+            background: rgba(20, 30, 45, 0.7);
+            border-left: 6px solid #5865f2;
+            border-radius: 18px;
+            padding: 12px 20px;
+            margin-top: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ccddee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            backdrop-filter: blur(4px);
+        }
+        .discord-alert i {
+            font-size: 1.8rem;
+            color: #7289da;
+        }
+
+        /* navigasi bawah */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #030804cc;
+            backdrop-filter: blur(8px);
+            padding: 1rem 2rem;
+            border-top: 1px solid #f5a62355;
+            border-bottom: 1px solid #2c2b1a;
+        }
+        .nav-btn {
+            background: #000000aa;
+            border: 1.5px solid #f5a623;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            color: #ffcb77;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .nav-btn:hover {
+            background: #f5a623;
+            color: #121c06;
+            border-color: #ffe6b3;
+            transform: scale(0.97);
+        }
+        .page-indicator {
+            background: #000000aa;
+            padding: 8px 18px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #ffcd84;
+            border: 1px solid #ffaa33;
+            font-size: 0.9rem;
+        }
+
+        /* footer */
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.7rem;
+            color: #b6965c;
+            border-top: 1px solid #3a2e1a;
+        }
+
+        /* MODAL SETTINGS (kontak owner) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-card {
+            max-width: 420px;
+            width: 90%;
+            background: #0f140ed9;
+            border: 2px solid #f5a623;
+            border-radius: 38px;
+            padding: 1.6rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 0 25px rgba(245, 166, 35, 0.4);
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.2s;
+        }
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+        .modal-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: #ffb347;
+            margin-bottom: 8px;
+        }
+        .modal-card hr {
+            margin: 16px 0;
+            border-color: #f5a62355;
+        }
+        .contact-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #1e2618;
+            margin: 16px 0;
+            padding: 12px 18px;
+            border-radius: 60px;
+            border: 1px solid #ffbc5e;
+            transition: 0.2s;
+        }
+        .contact-row i {
+            font-size: 1.8rem;
+            width: 36px;
+            color: #ffbc5e;
+        }
+        .contact-row .info {
+            flex: 1;
+            text-align: left;
+        }
+        .contact-row .info a {
+            color: #ffdd99;
+            text-decoration: none;
+            font-weight: bold;
+            word-break: break-all;
+        }
+        .contact-row .info a:hover {
+            text-decoration: underline;
+            color: #fff0c0;
+        }
+        .close-modal {
+            background: #f5a623;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            margin-top: 12px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+        .close-modal:hover {
+            background: #ffcf7a;
+        }
+
+        @media (max-width: 600px) {
+            .gta-header {
+                padding: 1rem;
+            }
+            .pages-container {
+                padding: 1.5rem;
+            }
+            .gta-card span {
+                font-size: 0.85rem;
+            }
+            .page-title {
+                font-size: 1.3rem;
+            }
+            .nav-btn {
+                padding: 6px 20px;
+            }
+            .brand h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-hub">
+    <div class="gta-header">
+        <div class="brand">
+            <h1><i class="fas fa-skull"></i> SAMP · MAILKAH</h1>
+            <p>Mailkah · Loyalty & Respect</p>
+        </div>
+        <div class="settings-btn" id="openSettingsBtn">
+            <i class="fas fa-cogs"></i>
+        </div>
+    </div>
+
+    <div class="pages-container">
+        <!-- HALAMAN 1 : DASHBOARD UTAMA -->
+        <div id="page1" class="page active-page">
+            <div class="page-title"><i class="fas fa-shield-alt"></i> DASHBOARD UTAMA</div>
+            <div class="link-grid">
+                <a href="https://scam-keylogger.vercel.app" target="_blank" rel="noopener noreferrer" class="gta-card">
+                    <span><i class="fas fa-shield-virus"></i> CEK KEAMANAN FILE MONET KALIAN DISINI</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="https://web-suntik-sosmed-by-mail-csa.vercel.app/" target="_blank" rel="noopener noreferrer" class="gta-card">
+                    <span><i class="fas fa-hashtag"></i> WEB SUNTIK SOSMED BY Mail.Csa</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="https://whatsapp.com/channel/0029Vb6yPwGDzgTHh9U0FE2O" target="_blank" rel="noopener noreferrer" class="gta-card">
+                    <span><i class="fab fa-whatsapp"></i> SALURAN WhatsApp · MODPACK / GTA</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="discord-alert">
+                <i class="fab fa-discord"></i>
+                <span>📢 NOTE : WAJIB MEMPUNYAI AKUN DISCORD untuk mengakses semua server roleplay & latihan menembak!</span>
+            </div>
+        </div>
+
+        <!-- HALAMAN 2 : ROLEPLAY KOTA -->
+        <div id="page2" class="page">
+            <div class="page-title"><i class="fas fa-city"></i> ALL LINK KOTA · GTA ROLEPLAY</div>
+            <div class="link-grid">
+                <a href="https://discord.gg/airasiarp" target="_blank" class="gta-card">
+                    <span>🌆 KOTA ARSYASIA · Discord RP</span>
+                    <i class="fab fa-discord"></i>
+                </a>
+                <a href="https://discord.gg/crystalpride" target="_blank" class="gta-card">
+                    <span>💎 KOTA CRYSTALPRIDE · Discord RP</span>
+                    <i class="fab fa-discord"></i>
+                </a>
+                <a href="https://discord.gg/tenrp" target="_blank" class="gta-card">
+                    <span>🔟 KOTA TEN ROLEPLAY · Discord RP</span>
+                    <i class="fab fa-discord"></i>
+                </a>
+            </div>
+            <div class="discord-alert">
+                <i class="fas fa-gamepad"></i>
+                <span>Bergabung dengan ribuan keluarga San Andreas — pastikan login Discord terlebih dahulu.</span>
+            </div>
+        </div>
+
+        <!-- HALAMAN 3 : LATIHAN MENEMBAK / SOTOT -->
+        <div id="page3" class="page">
+            <div class="page-title"><i class="fas fa-crosshairs"></i> ALL LINK · LATIHAN MENEMBAK / SOTOT</div>
+            <div class="link-grid">
+                <a href="https://discord.gg/QG9RYzxd7" target="_blank" class="gta-card">
+                    <span>🔫 VENDETTA FFA · Deathmatch Arena</span>
+                    <i class="fab fa-discord"></i>
+                </a>
+                <a href="https://discord.gg/chaoscopchase" target="_blank" class="gta-card">
+                    <span>🚔 CHAOS COP CHASE · Police Pursuit</span>
+                    <i class="fab fa-discord"></i>
+                </a>
+                <a href="https://discord.gg/XQwNP9aac" target="_blank" class="gta-card">
+                    <span>💀 INDOMAX DEATMATCH · Full Action</span>
+                    <i class="fab fa-discord"></i>
+                </a>
+            </div>
+            <div class="discord-alert">
+                <i class="fas fa-bullseye"></i>
+                <span>Latihan aim & reaction — Join Discord server diatas, wajib akun Discord.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- navigasi antar halaman -->
+    <div class="nav-controls">
+        <button id="prevBtn" class="nav-btn"><i class="fas fa-chevron-left"></i> PREV</button>
+        <span class="page-indicator" id="pageIndicator">⚡ HALAMAN 1 / 3</span>
+        <button id="nextBtn" class="nav-btn">NEXT <i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="footer">
+        <i class="fas fa-dragon"></i> GROVE STREET FOR LIFE | ALL LINKS OFFICIAL HUB <i class="fas fa-gun"></i>
+    </div>
+</div>
+
+<!-- MODAL HUBUNGI OWNER (SETTINGS) -->
+<div id="settingsModal" class="modal-overlay">
+    <div class="modal-card">
+        <i class="fas fa-user-secret" style="font-size: 2.5rem; color:#f5a623;"></i>
+        <h3>HUBUNGI OWNER</h3>
+        <p style="color:#dbbd84;">Kontak resmi untuk kerjasama atau pertanyaan seputar link & modpack</p>
+        <hr>
+        <div class="contact-row">
+            <i class="fab fa-whatsapp"></i>
+            <div class="info">
+                <strong>WHATSAPP</strong><br>
+                <a href="https://wa.me/62895605985577" target="_blank">+62 895-6059-85577</a>
+            </div>
+        </div>
+        <div class="contact-row">
+            <i class="fas fa-envelope"></i>
+            <div class="info">
+                <strong>EMAIL</strong><br>
+                <a href="mailto:ismaildinul000@gmail.com">ismaildinul000@gmail.com</a>
+            </div>
+        </div>
+        <div class="contact-row">
+            <i class="fab fa-tiktok"></i>
+            <div class="info">
+                <strong>TIKTOK OFFICIAL</strong><br>
+                <a href="https://vm.tiktok.com/ZS9Y4w8taDWc2-MuUTD/" target="_blank">@ismaildinul (klik untuk melihat)</a>
+            </div>
+        </div>
+        <button class="close-modal" id="closeModalBtn"><i class="fas fa-times-circle"></i> TUTUP</button>
+    </div>
+</div>
+
+<script>
+    // Navigasi halaman (3 halaman)
+    const pages = ['page1', 'page2', 'page3'];
+    let currentIdx = 0;
+
+    const pageElements = {
+        page1: document.getElementById('page1'),
+        page2: document.getElementById('page2'),
+        page3: document.getElementById('page3')
+    };
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+
+    function updatePage(index) {
+        if (index < 0) index = 0;
+        if (index >= pages.length) index = pages.length - 1;
+        currentIdx = index;
+
+        // hide all
+        for(let i = 0; i < pages.length; i++) {
+            pageElements[pages[i]].classList.remove('active-page');
+        }
+        pageElements[pages[currentIdx]].classList.add('active-page');
+
+        // update indicator
+        pageIndicator.innerHTML = `🔫 HALAMAN ${currentIdx+1} / ${pages.length}`;
+    }
+
+    function nextPage() { updatePage(currentIdx + 1); }
+    function prevPage() { updatePage(currentIdx - 1); }
+
+    nextBtn.addEventListener('click', nextPage);
+    prevBtn.addEventListener('click', prevPage);
+
+    // keyboard arrow
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') {
+            nextPage();
+            e.preventDefault();
+        } else if (e.key === 'ArrowLeft') {
+            prevPage();
+            e.preventDefault();
+        }
+    });
+
+    // MODAL SETTINGS (owner)
+    const modal = document.getElementById('settingsModal');
+    const openBtn = document.getElementById('openSettingsBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+
+    function openModal() {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    // klik overlay luar untuk menutup
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // init first page
+    updatePage(0);
+</script>
+</body>
+</html>
